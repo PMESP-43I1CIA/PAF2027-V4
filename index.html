@@ -922,12 +922,10 @@
             <div id="mensagemEscolhas"></div>
 
 
-            <button id="btnEnviar">
-
-                Confirmar e Enviar Escolhas
-
-            </button>
-
+            <div class="modal-buttons" style="margin-top: 10px;">
+                <button type="button" id="btnLimpar" class="btn-cancelar" onclick="limparEscolhas()">LIMPAR</button>
+                <button type="button" id="btnEnviar">Confirmar e Enviar Escolhas</button>
+            </div>
 
             <div class="loading" id="loadingEnvio">
 
@@ -1766,21 +1764,17 @@ function limparEscolhas() {
     if (!confirm("Deseja realmente limpar todas as escolhas de férias?")) return;
     for (let i = 1; i <= 3; i++) {
         document.getElementById("tipo" + i).value = "30";
-        ["mes" + i, "mes" + i + "a", "mes" + i + "b"].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = "";
-        });
-        ["data" + i, "data" + i + "a", "data" + i + "b"].forEach(id => {
+        ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id => {
             const el = document.getElementById(id);
             if (el) { el.value = ""; el.removeAttribute("min"); el.removeAttribute("max"); }
         });
-        document.getElementById("bloco30_" + i).style.display = "block";
-        document.getElementById("bloco15_" + i).style.display = "none";
-        ["info" + i, "info" + i + "a", "info" + i + "b"].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=""; });
+        document.getElementById("bloco30_"+i).style.display = "block";
+        document.getElementById("bloco15_"+i).style.display = "none";
+        ["info"+i,"info"+i+"a","info"+i+"b"].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=""; });
     }
-    document.getElementById("mensagemEscolhas").innerHTML = "";
-    fecharModal();
     liberarTodosOsMeses();
+    limparMensagem("mensagemEscolhas");
+    fecharModal();
     document.getElementById("tipo1").focus();
 }
 
