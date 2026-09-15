@@ -708,6 +708,8 @@
 
                 <select id="tipo1">
 
+                    <option value="" selected disabled>Selecione o tipo de período</option>
+
                     <option value="30">30 dias diretos</option>
 
                     <option value="15">15 + 15 dias</option>
@@ -783,6 +785,8 @@
 
                 <select id="tipo2">
 
+                    <option value="" selected disabled>Selecione o tipo de período</option>
+
                     <option value="30">30 dias diretos</option>
 
                     <option value="15">15 + 15 dias</option>
@@ -857,6 +861,8 @@
                 <label for="tipo3">Tipo de Período</label>
 
                 <select id="tipo3">
+
+                    <option value="" selected disabled>Selecione o tipo de período</option>
 
                     <option value="30">30 dias diretos</option>
 
@@ -1763,7 +1769,7 @@ function prepararConfirmacao() {
 function limparEscolhas() {
     if (!confirm("Deseja realmente limpar todas as escolhas de férias?")) return;
     for (let i = 1; i <= 3; i++) {
-        document.getElementById("tipo" + i).value = "30";
+        document.getElementById("tipo" + i).value = "";
         ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id => {
             const el = document.getElementById(id);
             if (el) { el.value = ""; el.removeAttribute("min"); el.removeAttribute("max"); }
@@ -1792,7 +1798,7 @@ function voltarLogin() {
 }
 
 function limparEscolhasSemConfirmacao() {
-    for (let i=1;i<=3;i++) { document.getElementById("tipo"+i).value="30"; ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id=>{const e=document.getElementById(id); if(e)e.value="";}); document.getElementById("bloco30_"+i).style.display="block"; document.getElementById("bloco15_"+i).style.display="none"; } liberarTodosOsMeses();
+    for (let i=1;i<=3;i++) { document.getElementById("tipo"+i).value=""; ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id=>{const e=document.getElementById(id); if(e)e.value="";}); document.getElementById("bloco30_"+i).style.display="none"; document.getElementById("bloco15_"+i).style.display="none"; } liberarTodosOsMeses();
 }
 
 /* ==========================================================
