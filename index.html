@@ -1106,6 +1106,12 @@ function preencherTodosOsMeses() {
 
         select.innerHTML = "";
 
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Selecione o mês";
+        placeholder.selected = true;
+        placeholder.disabled = true;
+        select.appendChild(placeholder);
 
         MESES.forEach(mes => {
 
@@ -1221,57 +1227,30 @@ function configurarEventos() {
 
 function configurarEstadoInicial() {
 
-
     for (let i = 1; i <= 3; i++) {
+        const tipo = document.getElementById("tipo" + i);
+        tipo.value = "";
 
+        ["mes" + i, "mes" + i + "a", "mes" + i + "b"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
 
-        document.getElementById("mes" + i).value = "1";
+        ["data" + i, "data" + i + "a", "data" + i + "b"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = "";
+                el.disabled = true;
+                el.removeAttribute("min");
+                el.removeAttribute("max");
+            }
+        });
 
-        document.getElementById("mes" + i + "a").value = "1";
-
-        document.getElementById("mes" + i + "b").value = "2";
-
-
-        atualizarDataMes(
-
-            document.getElementById("mes" + i),
-
-            document.getElementById("data" + i),
-
-            document.getElementById("info" + i),
-
-            30
-
-        );
-
-
-        atualizarDataMes(
-
-            document.getElementById("mes" + i + "a"),
-
-            document.getElementById("data" + i + "a"),
-
-            document.getElementById("info" + i + "a"),
-
-            15
-
-        );
-
-
-        atualizarDataMes(
-
-            document.getElementById("mes" + i + "b"),
-
-            document.getElementById("data" + i + "b"),
-
-            document.getElementById("info" + i + "b"),
-
-            15
-
-        );
-
+        document.getElementById("bloco30_" + i).style.display = "none";
+        document.getElementById("bloco15_" + i).style.display = "none";
     }
 
+    liberarTodosOsMeses();
 }
 
 
