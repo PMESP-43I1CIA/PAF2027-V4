@@ -781,7 +781,7 @@
      */
 
     const URL_APPS_SCRIPT =
-        "https://script.google.com/macros/s/AKfycbw7xc9mAHE3oWoEmeFj1OT3Xahj0LamRw0-EfAbDBbhNhytmLnw3wyXOj0OrZVtYO4ZGQ/exec";
+        "https://script.google.com/macros/s/AKfycbyw5hkbnxHFi_nHl5cMci_D5bDuB6P-BR0Q8pq0pMbpSxUzC1lgpQUNtLiCnVysJEox/exec";
 
 
     /*
@@ -1005,6 +1005,8 @@
 
                 window.scrollTo(0, 0);
 
+                atualizarBloqueiosMeses();
+
             }
             else {
 
@@ -1064,11 +1066,6 @@
         else {
 
             segundoPeriodo.classList.add("oculto");
-
-            /*
-             * CORREÇÃO:
-             * Campos ocultos não são obrigatórios em 30 dias.
-             */
 
             mesSegundo.required = false;
             dataSegundo.required = false;
@@ -1160,7 +1157,78 @@
 
 
     /*
-     * BLOQUEIA MESES REPETIDOS
+     * RETORNA TODOS OS MESES UTILIZADOS EM UMA OPÇÃO
+     */
+
+    function obterMesesOpcao(opcao) {
+
+        const tipo =
+            document.getElementById(`tipo${opcao}`).value;
+
+        const mes1 =
+            document.getElementById(`mes${opcao}`).value;
+
+        const mes2 =
+            document.getElementById(`mes${opcao}b`).value;
+
+        const resultado = [];
+
+        if (mes1) {
+            resultado.push(mes1);
+        }
+
+        if (tipo === "15+15" && mes2) {
+            resultado.push(mes2);
+        }
+
+        return resultado;
+
+    }
+
+
+    /*
+     * RETORNA TODOS OS DADOS ESCOLHIDOS
+     */
+
+    function obterTodasAsEscolhas() {
+
+        const escolhas = [];
+
+        for (let i = 1; i <= 3; i++) {
+
+            const tipo =
+                document.getElementById(`tipo${i}`).value;
+
+            const mesesOpcao =
+                obterMesesOpcao(i);
+
+            mesesOpcao.forEach(function (mes) {
+
+                escolhas.push({
+                    opcao: i,
+                    tipo: tipo,
+                    mes: mes
+                });
+
+            });
+
+        }
+
+        return escolhas;
+
+    }
+
+
+    /*
+     * BLOQUEIO INTELIGENTE DE MESES
+     *
+     * REGRAS:
+     *
+     * 1. O mesmo tipo de férias não pode repetir mês entre opções.
+     * 2. 30 dias em Janeiro bloqueia Janeiro apenas para 30 dias.
+     * 3. 15+15 em Janeiro/Fevereiro bloqueia esses meses apenas para 15+15.
+     * 4. Tipos diferentes podem utilizar o mesmo mês.
+     * 5. Os dois períodos da mesma opção continuam não podendo repetir mês.
      */
 
     function atualizarBloqueiosMeses() {
@@ -1169,32 +1237,34 @@
 
         for (let i = 1; i <= 3; i++) {
 
-            todosSelects.push(
-                document.getElementById(`mes${i}`)
-            );
+            todosSelects.push({
+                elemento: document.getElementById(`mes${i}`),
+                opcao: i,
+                periodo: 1
+            });
 
             const tipo =
                 document.getElementById(`tipo${i}`).value;
 
             if (tipo === "15+15") {
 
-                todosSelects.push(
-                    document.getElementById(`mes${i}b`)
-                );
+                todosSelects.push({
+                    elemento: document.getElementById(`mes${i}b`),
+                    opcao: i,
+                    periodo: 2
+                });
 
             }
 
         }
 
 
-        const valoresSelecionados = todosSelects
-            .map(select => select.value)
-            .filter(valor => valor !== "");
+        todosSelects.forEach(function (itemAtual) {
 
-
-        todosSelects.forEach(function (selectAtual) {
-
+            const selectAtual = itemAtual.elemento;
             const valorAtual = selectAtual.value;
+            const tipoAtual =
+                document.getElementById(`tipo${itemAtual.opcao}`).value;
 
             Array.from(selectAtual.options).forEach(function (option) {
 
@@ -1202,9 +1272,97 @@
                     return;
                 }
 
-                option.disabled =
-                    valoresSelecionados.includes(option.value) &&
-                    option.value !== valorAtual;
+                let deveBloquear = false;
+
+                for (let i = 1; i <= 3; i++) {
+
+                    const tipoOutra =
+                        document.getElementById(`tipo${i}`).value;
+
+                    if (!tipoOutra) {
+                        continue;
+                    }
+
+
+                    const mesesOutra =
+                        obterMesesOpcao(i);
+
+
+                    for (let j = 0; j < mesesOutra.length; j++) {
+
+                        const mesOutra =
+                            mesesOutra[j];
+
+                        if (mesOutra !== option.value) {
+                            continue;
+                        }
+
+
+                        /*
+                         * Ignora a própria seleção.
+                         */
+
+                        if (i === itemAtual.opcao) {
+
+                            const mes1 =
+                                document.getElementById(`mes${i}`).value;
+
+                            const mes2 =
+                                document.getElementById(`mes${i}b`).value;
+
+                            if (
+                                itemAtual.periodo === 1 &&
+                                mes1 === option.value
+                            ) {
+                                continue;
+                            }
+
+                            if (
+                                itemAtual.periodo === 2 &&
+                                mes2 === option.value
+                            ) {
+                                continue;
+                            }
+
+                        }
+
+
+                        /*
+                         * Mesma opção: períodos diferentes.
+                         * Nunca permite o mesmo mês em 15+15.
+                         */
+
+                        if (i === itemAtual.opcao) {
+
+                            if (
+                                tipoOutra === "15+15" &&
+                                tipoAtual === "15+15"
+                            ) {
+                                deveBloquear = true;
+                            }
+
+                            continue;
+
+                        }
+
+
+                        /*
+                         * Opções diferentes:
+                         * bloqueia somente quando o tipo é igual.
+                         */
+
+                        if (tipoOutra === tipoAtual) {
+
+                            deveBloquear = true;
+
+                        }
+
+                    }
+
+                }
+
+
+                option.disabled = deveBloquear;
 
             });
 
@@ -1384,8 +1542,12 @@
         mensagem.textContent = "";
 
 
-        const mesesEscolhidos = [];
+        const escolhas = [];
 
+
+        /*
+         * VALIDA CAMPOS INDIVIDUAIS
+         */
 
         for (let i = 1; i <= 3; i++) {
 
@@ -1429,7 +1591,11 @@
             }
 
 
-            mesesEscolhidos.push(mes1);
+            escolhas.push({
+                opcao: i,
+                tipo: tipo,
+                mes: mes1
+            });
 
 
             if (tipo === "15+15") {
@@ -1471,7 +1637,11 @@
                 }
 
 
-                mesesEscolhidos.push(mes2);
+                escolhas.push({
+                    opcao: i,
+                    tipo: tipo,
+                    mes: mes2
+                });
 
             }
 
@@ -1479,22 +1649,75 @@
 
 
         /*
-         * VERIFICA MESES REPETIDOS
+         * VERIFICA MESES REPETIDOS DENTRO DA MESMA OPÇÃO
          */
 
-        const mesesRepetidos =
-            mesesEscolhidos.filter(
-                (mes, indice) =>
-                    mesesEscolhidos.indexOf(mes) !== indice
-            );
+        for (let i = 1; i <= 3; i++) {
+
+            const tipo =
+                document.getElementById(`tipo${i}`).value;
+
+            if (tipo !== "15+15") {
+                continue;
+            }
+
+            const mes1 =
+                document.getElementById(`mes${i}`).value;
+
+            const mes2 =
+                document.getElementById(`mes${i}b`).value;
+
+            if (mes1 === mes2) {
+
+                mensagem.textContent =
+                    `Os dois períodos da ${i}ª opção devem possuir meses diferentes.`;
+
+                return false;
+
+            }
+
+        }
 
 
-        if (mesesRepetidos.length > 0) {
+        /*
+         * VERIFICA REPETIÇÃO ENTRE OPÇÕES DO MESMO TIPO
+         *
+         * É PERMITIDO:
+         *
+         * Opção 1: 30 dias - Janeiro
+         * Opção 2: 15+15 - Janeiro/Fevereiro
+         *
+         * NÃO É PERMITIDO:
+         *
+         * Opção 1: 30 dias - Janeiro
+         * Opção 2: 30 dias - Janeiro
+         *
+         * Opção 1: 15+15 - Janeiro/Fevereiro
+         * Opção 2: 15+15 - Janeiro/Março
+         */
 
-            mensagem.textContent =
-                "Não é permitido repetir meses entre as opções de férias.";
+        for (let i = 0; i < escolhas.length; i++) {
 
-            return false;
+            for (let j = i + 1; j < escolhas.length; j++) {
+
+                const escolhaA = escolhas[i];
+                const escolhaB = escolhas[j];
+
+
+                if (
+                    escolhaA.opcao !== escolhaB.opcao &&
+                    escolhaA.tipo === escolhaB.tipo &&
+                    escolhaA.mes === escolhaB.mes
+                ) {
+
+                    mensagem.textContent =
+                        `O mês ${nomeDoMes(escolhaA.mes)} foi repetido entre opções do mesmo tipo de férias.`;
+
+                    return false;
+
+                }
+
+            }
 
         }
 
@@ -1618,13 +1841,6 @@
 
     /*
      * ENVIO DOS DADOS
-     *
-     * CORREÇÃO PRINCIPAL:
-     *
-     * 1. Não utiliza headers Content-Type.
-     * 2. Confirma que CPF e nome existem.
-     * 3. Envia op1, op2 e op3 preenchidos.
-     * 4. Interpreta corretamente a resposta do Apps Script.
      */
 
     async function enviarDados() {
@@ -1725,7 +1941,6 @@
         try {
 
             /*
-             * IMPORTANTE:
              * Não adicionar headers Content-Type.
              */
 
