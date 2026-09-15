@@ -708,6 +708,8 @@
 
                 <select id="tipo1">
 
+                    <option value="" selected disabled>Selecione o tipo de período</option>
+
                     <option value="30">30 dias diretos</option>
 
                     <option value="15">15 + 15 dias</option>
@@ -782,6 +784,8 @@
                 <label for="tipo2">Tipo de Período</label>
 
                 <select id="tipo2">
+
+                    <option value="" selected disabled>Selecione o tipo de período</option>
 
                     <option value="30">30 dias diretos</option>
 
@@ -858,6 +862,8 @@
 
                 <select id="tipo3">
 
+                    <option value="" selected disabled>Selecione o tipo de período</option>
+
                     <option value="30">30 dias diretos</option>
 
                     <option value="15">15 + 15 dias</option>
@@ -922,12 +928,10 @@
             <div id="mensagemEscolhas"></div>
 
 
-            <button id="btnEnviar">
-
-                Confirmar e Enviar Escolhas
-
-            </button>
-
+            <div class="modal-buttons" style="margin-top: 10px;">
+                <button type="button" id="btnLimpar" class="btn-cancelar" onclick="limparEscolhas()">LIMPAR</button>
+                <button type="button" id="btnEnviar">Confirmar e Enviar Escolhas</button>
+            </div>
 
             <div class="loading" id="loadingEnvio">
 
@@ -1102,6 +1106,12 @@ function preencherTodosOsMeses() {
 
         select.innerHTML = "";
 
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Selecione o mês";
+        placeholder.selected = true;
+        placeholder.disabled = true;
+        select.appendChild(placeholder);
 
         MESES.forEach(mes => {
 
@@ -1217,57 +1227,30 @@ function configurarEventos() {
 
 function configurarEstadoInicial() {
 
-
     for (let i = 1; i <= 3; i++) {
+        const tipo = document.getElementById("tipo" + i);
+        tipo.value = "";
 
+        ["mes" + i, "mes" + i + "a", "mes" + i + "b"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
 
-        document.getElementById("mes" + i).value = "1";
+        ["data" + i, "data" + i + "a", "data" + i + "b"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.value = "";
+                el.disabled = true;
+                el.removeAttribute("min");
+                el.removeAttribute("max");
+            }
+        });
 
-        document.getElementById("mes" + i + "a").value = "1";
-
-        document.getElementById("mes" + i + "b").value = "2";
-
-
-        atualizarDataMes(
-
-            document.getElementById("mes" + i),
-
-            document.getElementById("data" + i),
-
-            document.getElementById("info" + i),
-
-            30
-
-        );
-
-
-        atualizarDataMes(
-
-            document.getElementById("mes" + i + "a"),
-
-            document.getElementById("data" + i + "a"),
-
-            document.getElementById("info" + i + "a"),
-
-            15
-
-        );
-
-
-        atualizarDataMes(
-
-            document.getElementById("mes" + i + "b"),
-
-            document.getElementById("data" + i + "b"),
-
-            document.getElementById("info" + i + "b"),
-
-            15
-
-        );
-
+        document.getElementById("bloco30_" + i).style.display = "none";
+        document.getElementById("bloco15_" + i).style.display = "none";
     }
 
+    liberarTodosOsMeses();
 }
 
 
@@ -1765,22 +1748,18 @@ function prepararConfirmacao() {
 function limparEscolhas() {
     if (!confirm("Deseja realmente limpar todas as escolhas de férias?")) return;
     for (let i = 1; i <= 3; i++) {
-        document.getElementById("tipo" + i).value = "30";
-        ["mes" + i, "mes" + i + "a", "mes" + i + "b"].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = "";
-        });
-        ["data" + i, "data" + i + "a", "data" + i + "b"].forEach(id => {
+        document.getElementById("tipo" + i).value = "";
+        ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id => {
             const el = document.getElementById(id);
             if (el) { el.value = ""; el.removeAttribute("min"); el.removeAttribute("max"); }
         });
-        document.getElementById("bloco30_" + i).style.display = "block";
-        document.getElementById("bloco15_" + i).style.display = "none";
-        ["info" + i, "info" + i + "a", "info" + i + "b"].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=""; });
+        document.getElementById("bloco30_"+i).style.display = "none";
+        document.getElementById("bloco15_"+i).style.display = "none";
+        ["info"+i,"info"+i+"a","info"+i+"b"].forEach(id => { const el=document.getElementById(id); if(el) el.innerHTML=""; });
     }
-    document.getElementById("mensagemEscolhas").innerHTML = "";
-    fecharModal();
     liberarTodosOsMeses();
+    limparMensagem("mensagemEscolhas");
+    fecharModal();
     document.getElementById("tipo1").focus();
 }
 
@@ -1798,7 +1777,7 @@ function voltarLogin() {
 }
 
 function limparEscolhasSemConfirmacao() {
-    for (let i=1;i<=3;i++) { document.getElementById("tipo"+i).value="30"; ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id=>{const e=document.getElementById(id); if(e)e.value="";}); document.getElementById("bloco30_"+i).style.display="block"; document.getElementById("bloco15_"+i).style.display="none"; } liberarTodosOsMeses();
+    for (let i=1;i<=3;i++) { document.getElementById("tipo"+i).value=""; ["mes"+i,"mes"+i+"a","mes"+i+"b","data"+i,"data"+i+"a","data"+i+"b"].forEach(id=>{const e=document.getElementById(id); if(e)e.value="";}); document.getElementById("bloco30_"+i).style.display="none"; document.getElementById("bloco15_"+i).style.display="none"; } liberarTodosOsMeses();
 }
 
 /* ==========================================================
